@@ -1,0 +1,476 @@
+Mobile Frontend Take-Home Test: React Native App with Auth, State Management, 
+Favorites, and Profile 
+Overview 
+The goal of this exercise is to evaluate your ability to build a modern mobile application 
+using React Native or Expo. 
+You will build a small course app that demonstrates not only UI implementation, but 
+also how you handle: 
+• API integration 
+• authentication 
+• shared state management 
+• navigation 
+• user interactions 
+• mobile user experience across multiple screens 
+The app should include: 
+• Login flow using MockAPI 
+• Course browsing 
+• Course detail screen 
+• Comments and likes 
+• Favorites / saved courses 
+• Editable profile screen 
+• Centralized state management 
+We are primarily evaluating: 
+• Code quality and readability 
+• Architecture and maintainability 
+• State management 
+• API integration 
+• Navigation and mobile UX 
+• Ability to model realistic app behavior 
+ 
+
+---PAGE---
+
+Tech Stack 
+Required 
+• React Native or Expo 
+• TypeScript 
+Allowed 
+You may use any reasonable libraries for: 
+• Navigation 
+• State management 
+• API requests 
+• UI components 
+• Form handling 
+• Storage 
+Examples: 
+• Navigation: React Navigation, Expo Router 
+• State management: Redux Toolkit, Zustand, Context API, Jotai 
+• API: Axios, fetch 
+• Storage: AsyncStorage 
+• UI: React Native Paper, NativeBase, Tamagui, or custom UI 
+ 
+Main Objective 
+Build a mobile course app where a user can: 
+• Log in using a user account from MockAPI 
+• Persist the session locally 
+• Browse and filter courses 
+• View course details 
+• Like and unlike comments 
+• Add comments as the logged-in user 
+• Save courses to favorites 
+
+---PAGE---
+
+• Access saved courses from a dedicated screen 
+• View and edit their profile 
+ 
+API Requirements 
+1. MockAPI Authentication 
+You must use MockAPI for login-related data. 
+Create a users resource in MockAPI. 
+Example user structure 
+User 
+- id 
+- name 
+- email 
+- password 
+- avatar 
+- bio 
+Example record 
+{ 
+  "id":"1" , 
+  "name":"John Doe" , 
+  "email":"john@example.com" , 
+  "password":"123456" , 
+  "avatar":"https://... " , 
+  "bio":"Mobile learner" 
+} 
+Login behavior 
+There is no real authentication backend required, so you can simulate login like this: 
+• Fetch users from MockAPI 
+• Match user by email 
+
+---PAGE---
+
+• Validate the entered password against the returned user record 
+• If credentials are correct:  
+o mark the user as logged in 
+o persist the logged-in user in local storage 
+• If credentials are incorrect:  
+o show an error message 
+Minimum login requirements 
+• Login form with:  
+o email 
+o password 
+• Validation for empty fields 
+• Loading state while checking credentials 
+• Error state for invalid login 
+• Persist session locally using AsyncStorage or similar 
+• Auto-login if a valid user session is found on app reopen 
+• Logout functionality 
+Notes 
+You do not need to implement signup unless you want to. 
+The goal is to evaluate: 
+• API integration 
+• async handling 
+• form validation 
+• loading and error states 
+• session persistence 
+ 
+2. Course Data 
+You may use: 
+• data.json 
+
+---PAGE---
+
+• MockAPI 
+• or a combination of both 
+Course structure 
+Course 
+- id 
+- title 
+- description 
+- content 
+- category 
+- duration 
+- level 
+- author 
+- image 
+- rating 
+- createdAt 
+Comment structure 
+Comment 
+- id 
+- courseId 
+- user 
+  - id 
+  - name 
+- message 
+- createdAt 
+- likesCount 
+- likedByUser 
+ 
+Required Features 
+
+---PAGE---
+
+1. Splash / App Loading Screen 
+Create an initial loading screen that checks whether a user session already exists. 
+Expected behavior 
+• On app start, check local storage for logged-in user 
+• If user exists:  
+o go directly to the authenticated flow 
+• If not:  
+o go to Login screen 
+This does not need to be visually complex, but it should be part of the app flow. 
+ 
+2. Login Screen 
+Create a login screen connected to MockAPI. 
+Requirements 
+• Input fields:  
+o email 
+o password 
+• Validate required fields 
+• Show loading state during login request 
+• Show invalid credentials error 
+• On success:  
+o save user session locally 
+o navigate to the main app flow 
+UX expectations 
+• Proper keyboard handling 
+• Disabled submit button while loading 
+• Clear error messages 
+ 
+3. Home Screen 
+
+---PAGE---
+
+Create a course list screen. 
+Each course card must display: 
+• Image 
+• Title 
+• Short description 
+• Category 
+• Rating 
+• Author or level 
+Requirements 
+• Search by title 
+• Category filter 
+• Empty state when no results 
+• Mobile-friendly list layout 
+• Tap course to navigate to detail screen 
+Additional requirement 
+Each course card or detail screen must allow the user to: 
+• save / unsave the course 
+• visually see whether the course is already saved 
+This can be shown with a bookmark, heart, or save icon. 
+ 
+4. Course Detail Screen 
+The detail screen must display: 
+• Course image 
+• Title 
+• Author 
+• Category 
+• Duration 
+• Level 
+
+---PAGE---
+
+• Full description or content 
+• Back navigation 
+• Save / unsave action 
+Requirements 
+• A user must be able to save a course from this screen 
+• The saved state should update immediately in the UI 
+ 
+5. Comments Section 
+Display comments for the selected course. 
+Each comment must show: 
+• User name 
+• Message 
+• Created date 
+• Likes count 
+• Like button 
+Requirements 
+• Logged-in user can add a comment 
+• New comments appear immediately 
+• Like / unlike updates immediately 
+• Shared state should manage comments and likes cleanly 
+We want to see whether you can model this beyond isolated local component state. 
+ 
+6. Favorites / Saved Courses Screen 
+Create a dedicated screen where the user can access saved courses. 
+Requirements 
+• Show all courses the user has saved 
+• Each saved item should show useful course information 
+• Tapping a saved course opens its detail page 
+
+---PAGE---
+
+• Empty state if there are no saved courses 
+• User can remove a course from favorites from this screen or from the detail 
+screen 
+Expected behavior 
+If a user saves a course: 
+• it should appear in the Favorites / Saved Courses screen 
+If a user unsaves a course: 
+• it should disappear from that screen 
+What we want to evaluate 
+• Shared state design 
+• Data flow between screens 
+• Navigation consistency 
+• Feature completeness 
+ 
+7. Profile Screen 
+Create a profile screen for the logged-in user. 
+The profile screen must display: 
+• Avatar 
+• Name 
+• Email 
+• Bio or short description 
+Requirements 
+• Show current logged-in user information 
+• Include an Edit Profile action 
+• Include Logout 
+ 
+8. Edit Profile Screen 
+Add a screen where the user can edit their profile. 
+
+---PAGE---
+
+Editable fields 
+At minimum: 
+• name 
+• avatar 
+• bio 
+You may allow email editing too, but it is optional. 
+Requirements 
+• Pre-fill the form with current user data 
+• Save changes to app state 
+• Persist changes locally 
+• Return to profile screen with updated data visible immediately 
+Bonus 
+If you want, you may also update the user in MockAPI, but this is optional unless you 
+explicitly choose to support it. 
+What we want to evaluate 
+• Form handling 
+• Editable state 
+• Shared state updates 
+• Persistence 
+• User flow between view and edit screens 
+ 
+9. State Management 
+A state management solution is required. 
+Use it for at least: 
+• Authentication state 
+• Current user state 
+• Favorites / saved courses 
+• Comment and like state 
+
+---PAGE---
+
+• Course-related shared state where needed 
+We want to evaluate: 
+• How you organize business logic 
+• Whether state is centralized where appropriate 
+• Whether updates are predictable and maintainable 
+• How well data flows across multiple screens 
+ 
+10. Navigation Structure 
+Your app should include at least these screens: 
+• Splash / Loading 
+• Login 
+• Home 
+• Course Detail 
+• Favorites / Saved Courses 
+• Profile 
+• Edit Profile 
+You may organize them with tabs, stacks, or nested navigation. 
+Example flow 
+Splash 
+→ Login 
+→ Main App 
+   → Home 
+   → Favorites 
+   → Profile 
+Home → Course Detail 
+Profile → Edit Profile 
+A tab-based structure for the authenticated area is a strong option. 
+ 
+
+---PAGE---
+
+UX Expectations 
+We are specifically evaluating mobile UX, so pay attention to: 
+• Navigation clarity 
+• Consistent spacing 
+• Loading states 
+• Error states 
+• Empty states 
+• Keyboard handling 
+• Touch-friendly controls 
+• Visual feedback for saving and liking 
+• Clear logout and profile edit flow 
+A simple but polished experience is better than a flashy but inconsistent one. 
+ 
+What We Evaluate 
+We evaluate: 
+• Code quality and readability 
+• Project structure 
+• TypeScript usage 
+• API integration quality 
+• State management approach 
+• Navigation design 
+• Reusability of components 
+• Mobile UX quality 
+• Maintainability 
+ 
+Bonus Points 
+Bonus points for: 
+• Clean API abstraction layer 
+
+---PAGE---
+
+• Reusable hooks 
+• Form validation 
+• Session persistence 
+• Optimistic UI updates 
+• Pull to refresh 
+• Dark mode 
+• Animations 
+• Tests 
+• Import aliases 
+Example: 
+   import CourseCard from '@components/CourseCard' 
+  import CourseCard from ' ../../../../components/CourseCard' 
+ 
+Deliverables 
+Provide a Git repository containing: 
+• Source code 
+• MockAPI endpoint details 
+• README.md with:  
+o Setup instructions 
+o Libraries used and why 
+o State management approach 
+o Assumptions made 
+o Improvements you would make with more time 
+The project must run with: 
+npm install 
+npx expostart 
+or equivalent for your chosen setup. 
+ 
+
+---PAGE---
+
+Suggested MockAPI Resources 
+A good MockAPI setup may include: 
+users 
+Used for login and profile data 
+courses 
+Used for course listing and detail data 
+comments 
+Optional if you want to separate comments from courses 
+You may decide your own API structure, but keep it clean and easy to understand. 
+ 
+Important Notes 
+• We are not expecting production-grade authentication security. 
+• This is a frontend-focused exercise. 
+• MockAPI login can be simulated by fetching users and validating credentials on 
+the client side. 
+• The goal is to show realistic app architecture and good engineering decisions. 
+ 
+Optional Extra Challenge 
+If you want to go further, you may also add: 
+• Edit/delete own comments 
+• Persist favorites remotely 
+• Protected routes 
+• Better loading skeletons 
+• Infinite scroll 
+• Offline-friendly behavior 
+        APK Build (Optional but Highly Recommended) 
+Objective 
+
+---PAGE---
+
+We strongly encourage you to provide a build of the application that can be installed 
+on a real device, allowing us to evaluate the full mobile experience. 
+ 
+Recommendation 
+If possible, include a working Android .apk file of your application. 
+This helps us: 
+• Test the app directly on a device 
+• Evaluate real user experience and performance 
+• Validate navigation and interactions more effectively 
+ 
+How to Build (Expo) 
+If you are using Expo, you can generate an APK using EAS Build: 
+npm install-g eas-cli 
+eas build:configure 
+eas build-p android--profile preview 
+ 
+How to Share 
+You may provide: 
+• A download link (Google Drive, Dropbox, Expo, etc.) 
+or 
+• Include the APK in the repository (if size allows) 
+ 
+Notes 
+• This step is optional, but highly valued 
+• iOS builds are not required 
+• Production signing is not required 
+ 
+  Why This Matters 
+
+---PAGE---
+
+Providing an APK demonstrates: 
+• Ability to deliver a complete mobile app 
+• Understanding of build and deployment tools 
+• Attention to real-world usability 
+Submissions that include a working APK will be viewed more favorably. 
+ 
+This keeps it: 
+   optional 
+   but clearly important 
+   and aligned with real-world expectations 
+ 

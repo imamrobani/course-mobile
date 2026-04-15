@@ -1,39 +1,42 @@
 import React from 'react';
-import { Alert } from 'react-native';
+import { KeyboardAvoidingView, Platform } from 'react-native';
 import { Button, Text, TextInput, View } from '@components';
 import { useForm } from '@hooks';
-import { useAppDispatch } from '@store/hooks';
-import { login } from '@store/slice/auth/authSlice';
+import { useAppDispatch, useAppSelector } from '@store/hooks';
+import {
+  loginWithEmailPassword,
+  setAuthError,
+} from '@store/slice/auth/authSlice';
 import styles from './styles';
 
 const LoginScreen = () => {
   const dispatch = useAppDispatch();
+  const { isAuthenticating, error } = useAppSelector((state) => state.auth);
   const [form, setForm] = useForm({
-    username: '',
-    password: '',
+    email: 'john@example.com', // dummy email
+    password: '123456', // dummy password
   });
-  const [loading, setLoading] = React.useState(false);
 
-  const disabled = form.username === '' || form.password === '';
+  const disabled = form.email.trim() === '' || form.password === '';
 
   const handleLogin = async () => {
-    if (!form.username || !form.password) {
-      Alert.alert('Error', 'Username and password are required');
+    if (!form.email.trim() || !form.password) {
+      dispatch(setAuthError('Email dan password wajib diisi'));
       return;
     }
 
-    setLoading(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      await dispatch(login(form.username));
-    } catch {
-      Alert.alert('Error', 'Failed to login');
-      setLoading(false);
-    }
+    dispatch(
+      loginWithEmailPassword({
+        email: form.email.trim(),
+        password: form.password,
+      }),
+    );
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View marginBottom={24}>
         <Text type="headingL" center color="PRIMARY_MAIN">
           Welcome to Course Mobile
@@ -45,28 +48,47 @@ const LoginScreen = () => {
 
       <View style={styles.inputContainer}>
         <TextInput
-          label="Username"
-          placeholder="Enter your username"
-          value={form.username}
-          onChangeText={(text) => setForm({ username: text })}
+          label="Email"
+          placeholder="john@example.com"
+          value={form.email}
+          onChangeText={(text) => {
+            if (error) {
+              dispatch(setAuthError(null));
+            }
+            setForm({ email: text });
+          }}
           autoCapitalize="none"
+          keyboardType="email-address"
         />
         <TextInput
           label="Password"
-          placeholder="Enter your password"
+          placeholder="123456"
           isPassword
           value={form.password}
-          onChangeText={(text) => setForm({ password: text })}
+          onChangeText={(text) => {
+            if (error) {
+              dispatch(setAuthError(null));
+            }
+            setForm({ password: text });
+          }}
         />
       </View>
+
+      {error ? (
+        <View marginBottom={12}>
+          <Text type="body2Regular" color="DANGER_MAIN" center>
+            {error}
+          </Text>
+        </View>
+      ) : null}
 
       <Button
         label="Login"
         onPress={handleLogin}
-        isLoading={loading}
-        disabled={disabled || loading}
+        isLoading={isAuthenticating}
+        disabled={disabled || isAuthenticating}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

@@ -1,4 +1,5 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { AuthApi, LoginInput, LoginResult } from '@api/endpoints/auth';
 import { StorageKey } from '@constants';
 import { User } from '@type/models/user';
 import {
@@ -6,76 +7,128 @@ import {
   removeDataStorage,
   storeDataStorage,
 } from '@utils/storage';
-import { AppDispatch } from '../../store';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
+type AuthStatus = 'hydrating' | 'authenticated' | 'unauthenticated';
+
+type HydrateResult = { token: string; user: User } | null;
+
+export const hydrateAuth = createAsyncThunk<HydrateResult>(
+  'auth/hydrate',
+  async () => {
+    try {
+      const token = await getDataStorage<string>(StorageKey.TOKEN);
+      const user = await getDataStorage<User>(StorageKey.USER);
+
+      if (token && user) {
+        return { token, user };
+      }
+
+      return null;
+    } catch {
+      return null;
+    }
+  },
+);
+
+export const loginWithEmailPassword = createAsyncThunk<
+  LoginResult,
+  LoginInput,
+  { rejectValue: string }
+>('auth/login', async (payload, { rejectWithValue }) => {
+  try {
+    const result = await AuthApi.loginWithEmailPassword(payload);
+    await storeDataStorage(StorageKey.TOKEN, result.token);
+    await storeDataStorage(StorageKey.USER, result.user);
+    return result;
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Email atau password tidak valid';
+    return rejectWithValue(message);
+  }
+});
+
+export const logout = createAsyncThunk('auth/logout', async () => {
+  await removeDataStorage(StorageKey.TOKEN);
+  await removeDataStorage(StorageKey.USER);
+});
+
 interface AuthState {
+  status: AuthStatus;
   token: string | null;
   user: User | null;
+  isAuthenticating: boolean;
+  error: string | null;
 }
 
 const initialState: AuthState = {
+  status: 'hydrating',
   token: null,
   user: null,
+  isAuthenticating: false,
+  error: null,
 };
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setToken: (state, action: PayloadAction<string>) => {
-      state.token = action.payload;
+    setAuthError: (state, action: PayloadAction<string | null>) => {
+      state.error = action.payload;
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(hydrateAuth.pending, (state) => {
+        state.status = 'hydrating';
+        state.error = null;
+      })
+      .addCase(hydrateAuth.fulfilled, (state, action) => {
+        if (action.payload) {
+          state.token = action.payload.token;
+          state.user = action.payload.user;
+          state.status = 'authenticated';
+          return;
+        }
 
-    setAuth: (state, action: PayloadAction<AuthState>) => {
-      state.token = action.payload.token;
-      state.user = action.payload.user;
-    },
-
-    resetAuth: (state) => {
-      state.token = null;
-      state.user = null;
-    },
+        state.token = null;
+        state.user = null;
+        state.status = 'unauthenticated';
+      })
+      .addCase(hydrateAuth.rejected, (state) => {
+        state.token = null;
+        state.user = null;
+        state.status = 'unauthenticated';
+      })
+      .addCase(loginWithEmailPassword.pending, (state) => {
+        state.isAuthenticating = true;
+        state.error = null;
+      })
+      .addCase(loginWithEmailPassword.fulfilled, (state, action) => {
+        state.isAuthenticating = false;
+        state.token = action.payload.token;
+        state.user = action.payload.user;
+        state.status = 'authenticated';
+      })
+      .addCase(loginWithEmailPassword.rejected, (state, action) => {
+        state.isAuthenticating = false;
+        state.token = null;
+        state.user = null;
+        state.status = 'unauthenticated';
+        state.error = action.payload ?? 'Email atau password tidak valid';
+      })
+      .addCase(logout.fulfilled, (state) => {
+        state.token = null;
+        state.user = null;
+        state.status = 'unauthenticated';
+        state.isAuthenticating = false;
+        state.error = null;
+      });
   },
 });
 
-export const { setToken, setAuth, resetAuth } = authSlice.actions;
-
-export const loadAuth = () => async (dispatch: AppDispatch) => {
-  try {
-    const token = await getDataStorage<string>(StorageKey.TOKEN);
-    const user = await getDataStorage<User>(StorageKey.USER);
-
-    if (token && user) {
-      dispatch(setAuth({ token, user }));
-    }
-  } catch {
-    // console.error('Error loading auth info', error);
-  }
-};
-
-export const login = (username: string) => async (dispatch: AppDispatch) => {
-  // Use a deterministic ID based on username so returning users maintain their identity
-  // This ensures they can edit their own questions/comments after re-login
-  const normalizedId = username.toLowerCase().replace(/\s+/g, '-');
-  const mockUser: User = {
-    id: `user-${normalizedId}`,
-    name: username,
-    email: `${normalizedId}@course-mobile.com`,
-    avatar: `https://ui-avatars.com/api/?name=${username}&background=random`,
-  };
-  const mockToken = `mock-token-${Date.now()}`;
-
-  await storeDataStorage(StorageKey.TOKEN, mockToken);
-  await storeDataStorage(StorageKey.USER, mockUser);
-
-  dispatch(setAuth({ token: mockToken, user: mockUser }));
-};
-
-export const clearAuth = () => async (dispatch: AppDispatch) => {
-  await removeDataStorage(StorageKey.TOKEN);
-  await removeDataStorage(StorageKey.USER);
-  dispatch(resetAuth());
-};
+export const { setAuthError } = authSlice.actions;
 
 export default authSlice.reducer;

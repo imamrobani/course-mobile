@@ -7,6 +7,7 @@ export type RootStackParamList = {
         params?: MainTabParamList[keyof MainTabParamList];
       }
     | undefined;
+  EditProfile: undefined;
   CourseDetail: { id: string };
 };
 

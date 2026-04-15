@@ -1,20 +1,18 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { LoginScreen } from '@screens';
-import { useAppDispatch, useAppSelector } from '@store/hooks';
-import { loadAuth } from '@store/slice/auth/authSlice';
+import { EditProfileScreen, LoginScreen } from '@screens';
+import { useAppSelector } from '@store/hooks';
 import { RootStackParamList } from '@type/navigation';
 import MainTabNavigator from './tab/MainTabNavigator';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 const RootNavigator = () => {
-  const dispatch = useAppDispatch();
-  const { token } = useAppSelector((state) => state.auth);
+  const { status, token } = useAppSelector((state) => state.auth);
 
-  useEffect(() => {
-    dispatch(loadAuth());
-  }, [dispatch]);
+  if (status === 'hydrating') {
+    return null;
+  }
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -23,6 +21,7 @@ const RootNavigator = () => {
       ) : (
         <Stack.Group>
           <Stack.Screen name="MainTab" component={MainTabNavigator} />
+          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
         </Stack.Group>
       )}
     </Stack.Navigator>

@@ -7,6 +7,10 @@ const styles = StyleSheet.create({
     gap: 32,
     justifyContent: 'center',
   },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+  },
   inputContainer: {
     gap: 16,
   },

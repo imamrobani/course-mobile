@@ -13,6 +13,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
 import Fonts from '@constants/Fonts';
 import RootNavigator from '@navigation/RootNavigator';
+import { hydrateAuth } from '@store/slice/auth/authSlice';
 import { store } from '@store/store';
 
 SplashScreen.preventAutoHideAsync();
@@ -34,6 +35,26 @@ export function App() {
   const theme = colorScheme === 'dark' ? DarkTheme : DefaultTheme;
 
   const [loaded] = useFonts(FONT_FAMILY);
+  const [authHydrated, setAuthHydrated] = React.useState(false);
+  const [navReady, setNavReady] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!loaded) {
+      return;
+    }
+
+    store.dispatch(hydrateAuth()).finally(() => {
+      setAuthHydrated(true);
+    });
+  }, [loaded]);
+
+  React.useEffect(() => {
+    if (!loaded || !authHydrated || !navReady) {
+      return;
+    }
+
+    SplashScreen.hideAsync();
+  }, [loaded, authHydrated, navReady]);
 
   if (!loaded) {
     return null;
@@ -46,7 +67,7 @@ export function App() {
           <NavigationContainer
             theme={theme}
             linking={{ prefixes: [prefix] }}
-            onReady={() => SplashScreen.hideAsync()}>
+            onReady={() => setNavReady(true)}>
             <RootNavigator />
           </NavigationContainer>
         </KeyboardProvider>
