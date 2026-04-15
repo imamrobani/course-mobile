@@ -32,7 +32,7 @@ const Button: React.FC<ButtonProps> = ({
   height = 48,
   width,
   typeText = 'buttonSemiBold',
-  elevation = true,
+  elevation = false,
   style,
   ...props
 }) => {

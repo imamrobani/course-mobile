@@ -1,33 +1,49 @@
 import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Text, PlatformPressable } from '@react-navigation/elements';
 import { useLinkBuilder } from '@react-navigation/native';
-import { Icons } from '@assets';
 import { View } from '@components';
 import { Colors, shadowTypes } from '@constants';
 import { useInset } from '@hooks';
 import styles from './styles';
 
-const IconsTab = ({ label, focus }: { label: string; focus: boolean }) => {
-  switch (label) {
+const IconsTab = ({
+  routeName,
+  focus,
+}: {
+  routeName: string;
+  focus: boolean;
+}) => {
+  const color = focus ? Colors.PRIMARY_MAIN : Colors.NEUTRAL_50;
+
+  switch (routeName) {
     case 'Home':
       return (
-        <Icons.IcExplore
-          stroke={focus ? Colors.PRIMARY_MAIN : Colors.NEUTRAL_50}
+        <Ionicons
+          name={focus ? 'home' : 'home-outline'}
+          size={24}
+          color={color}
+        />
+      );
+    case 'Favorite':
+      return (
+        <Ionicons
+          name={focus ? 'heart' : 'heart-outline'}
+          size={24}
+          color={color}
         />
       );
     case 'Profile':
       return (
-        <Icons.IcProfile
-          stroke={focus ? Colors.PRIMARY_MAIN : Colors.NEUTRAL_50}
+        <Ionicons
+          name={focus ? 'person' : 'person-outline'}
+          size={24}
+          color={color}
         />
       );
     default:
-      return (
-        <Icons.IcEvent
-          stroke={focus ? Colors.PRIMARY_MAIN : Colors.NEUTRAL_50}
-        />
-      );
+      return <Ionicons name="ellipse" size={24} color={color} />;
   }
 };
 
@@ -83,7 +99,7 @@ const BottomTab: React.FC<BottomTabBarProps> = ({
               <View
                 style={[styles.indicator, { backgroundColor: bgIndicator }]}
               />
-              <IconsTab label={label} focus={isFocused} />
+              <IconsTab routeName={route.name} focus={isFocused} />
               <Text style={isFocused ? styles.activeTab : styles.inActiveTab}>
                 {label}
               </Text>

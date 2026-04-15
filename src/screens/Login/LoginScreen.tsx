@@ -36,7 +36,7 @@ const LoginScreen = () => {
     <View style={styles.container}>
       <View marginBottom={24}>
         <Text type="headingL" center color="PRIMARY_MAIN">
-          Stack Underflow
+          Welcome to Course Mobile
         </Text>
         <Text type="body1Regular" center color="NEUTRAL_70">
           Where developers mock developers
