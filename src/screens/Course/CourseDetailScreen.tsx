@@ -5,6 +5,7 @@ import { Image } from 'expo-image';
 import { Header, Text, View } from '@components';
 import { useAppSelector } from '@store/hooks';
 import { RootStackParamList } from '@type/navigation';
+import CommentsLikesSection from './components/CommentsLikesSection';
 import styles from './styles';
 import type { RouteProp } from '@react-navigation/native';
 
@@ -78,6 +79,8 @@ const CourseDetailScreen = () => {
             {course.content}
           </Text>
         </View>
+
+        <CommentsLikesSection courseId={course.id} />
       </ScrollView>
     </View>
   );
