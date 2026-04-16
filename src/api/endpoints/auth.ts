@@ -21,8 +21,9 @@ const loginWithEmailPassword = async (
   input: LoginInput,
 ): Promise<LoginResult> => {
   const users = await fetchUsers();
+  const normalizedEmail = input.email.trim().toLowerCase();
   const rawUser = users.find(
-    (u) => u.email.toLowerCase() === input.email.trim().toLowerCase(),
+    (user) => user.email.toLowerCase() === normalizedEmail,
   );
 
   if (!rawUser || rawUser.password !== input.password) {

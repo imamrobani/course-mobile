@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
@@ -21,7 +21,7 @@ const EditProfileScreen = () => {
     bio: user?.bio ?? '',
   });
 
-  const [error, setError] = React.useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const avatarSource = form.avatar.trim()
     ? { uri: form.avatar.trim() }

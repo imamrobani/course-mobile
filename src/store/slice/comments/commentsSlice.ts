@@ -33,10 +33,12 @@ const mergeById = (
   const result: Record<string, Comment[]> = { ...base };
 
   Object.entries(incoming).forEach(([courseId, list]) => {
-    const map = new Map((result[courseId] ?? []).map((c) => [c.id, c]));
-    list.forEach((c) => {
-      const prev = map.get(c.id);
-      map.set(c.id, prev ? { ...prev, ...c } : c);
+    const map = new Map(
+      (result[courseId] ?? []).map((comment) => [comment.id, comment]),
+    );
+    list.forEach((comment) => {
+      const prev = map.get(comment.id);
+      map.set(comment.id, prev ? { ...prev, ...comment } : comment);
     });
     result[courseId] = Array.from(map.values());
   });
@@ -151,7 +153,7 @@ const commentsSlice = createSlice({
         return;
       }
 
-      const comment = list.find((c) => c.id === commentId);
+      const comment = list.find((commentItem) => commentItem.id === commentId);
       if (!comment) {
         return;
       }

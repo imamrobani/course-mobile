@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Pressable, TextInput as RNTextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Button, Text, TextInputArea, View } from '@components';
@@ -18,8 +18,8 @@ const CommentsLikesSection = ({ courseId }: Props) => {
   const user = useAppSelector((state) => state.auth.user);
   const userId = useAppSelector((state) => state.auth.user?.id);
 
-  const [draft, setDraft] = React.useState('');
-  const inputRef = React.useRef<RNTextInput>(null);
+  const [draft, setDraft] = useState('');
+  const inputRef = useRef<RNTextInput>(null);
 
   const comments = useMemo(() => list ?? [], [list]);
   const likedSet = useMemo(() => new Set(likedIds), [likedIds]);
@@ -87,16 +87,16 @@ const CommentsLikesSection = ({ courseId }: Props) => {
         </View>
       ) : (
         <View gap={12}>
-          {comments.map((c) => {
-            const liked = likedSet.has(c.id);
+          {comments.map((comment) => {
+            const liked = likedSet.has(comment.id);
 
             return (
-              <View key={c.id} style={styles.commentItem} gap={8}>
+              <View key={comment.id} style={styles.commentItem} gap={8}>
                 <View style={styles.commentHeader}>
                   <View gap={2}>
-                    <Text type="body2SemiBold">{c.user.name}</Text>
+                    <Text type="body2SemiBold">{comment.user.name}</Text>
                     <Text type="captionSRegular" color="NEUTRAL_70">
-                      {new Date(c.createdAt).toLocaleString()}
+                      {new Date(comment.createdAt).toLocaleString()}
                     </Text>
                   </View>
 
@@ -108,7 +108,7 @@ const CommentsLikesSection = ({ courseId }: Props) => {
                             toggleLike({
                               userId,
                               courseId,
-                              commentId: c.id,
+                              commentId: comment.id,
                             }),
                           )
                         : undefined
@@ -119,13 +119,13 @@ const CommentsLikesSection = ({ courseId }: Props) => {
                       color={liked ? Colors.ACCENT_MAIN : Colors.NEUTRAL_70}
                     />
                     <Text type="captionSRegular" color="NEUTRAL_80">
-                      {c.likesCount}
+                      {comment.likesCount}
                     </Text>
                   </Pressable>
                 </View>
 
                 <Text type="body2Regular" color="NEUTRAL_80">
-                  {c.message}
+                  {comment.message}
                 </Text>
               </View>
             );

@@ -25,7 +25,7 @@ const CourseDetailScreen = () => {
   const userId = useAppSelector((state) => state.auth.user?.id);
 
   const course = useMemo(
-    () => items.find((c) => c.id === route.params.id),
+    () => items.find((courseItem) => courseItem.id === route.params.id),
     [items, route.params.id],
   );
 
@@ -57,7 +57,7 @@ const CourseDetailScreen = () => {
 
     const exists = favorites.ids.includes(course.id);
     const nextIds = exists
-      ? favorites.ids.filter((x) => x !== course.id)
+      ? favorites.ids.filter((favoriteId) => favoriteId !== course.id)
       : [...favorites.ids, course.id];
 
     dispatch(toggleFavoriteLocal({ courseId: course.id }));

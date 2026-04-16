@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FlatList, StatusBar } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -28,22 +28,25 @@ const HomeScreen = () => {
   const { items, query, category } = useAppSelector((state) => state.courses);
   const favorites = useAppSelector((state) => state.favorites);
   const userId = useAppSelector((state) => state.auth.user?.id);
+  const [refreshing, setRefreshing] = useState(false);
 
   const favoriteSet = useMemo(() => new Set(favorites.ids), [favorites.ids]);
 
   const categories = useMemo(() => {
-    const unique = Array.from(new Set(items.map((c) => c.category))).sort(
-      (a, b) => a.localeCompare(b),
-    );
-    return [ALL_COURSES_KEY, ...unique];
+    const uniqueCategories = Array.from(
+      new Set(items.map((course) => course.category)),
+    ).sort((a, b) => a.localeCompare(b));
+    return [ALL_COURSES_KEY, ...uniqueCategories];
   }, [items]);
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return items.filter((c) => {
-      const matchesQuery = q ? c.title.toLowerCase().includes(q) : true;
+    const normalizedQuery = query.trim().toLowerCase();
+    return items.filter((course) => {
+      const matchesQuery = normalizedQuery
+        ? course.title.toLowerCase().includes(normalizedQuery)
+        : true;
       const matchesCategory =
-        category === ALL_COURSES_KEY ? true : c.category === category;
+        category === ALL_COURSES_KEY ? true : course.category === category;
       return matchesQuery && matchesCategory;
     });
   }, [items, query, category]);
@@ -57,13 +60,19 @@ const HomeScreen = () => {
       return;
     }
 
-    const exists = favoriteSet.has(courseId);
-    const nextIds = exists
-      ? favorites.ids.filter((x) => x !== courseId)
+    const isAlreadyFavorited = favoriteSet.has(courseId);
+    const nextFavoriteIds = isAlreadyFavorited
+      ? favorites.ids.filter((favoriteId) => favoriteId !== courseId)
       : [...favorites.ids, courseId];
 
     dispatch(toggleFavoriteLocal({ courseId }));
-    dispatch(persistFavorites({ userId, ids: nextIds }));
+    dispatch(persistFavorites({ userId, ids: nextFavoriteIds }));
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    setRefreshing(false);
   };
 
   const renderItem = ({ item }: { item: Course }) => (
@@ -95,6 +104,8 @@ const HomeScreen = () => {
         ItemSeparatorComponent={Separator}
         renderItem={renderItem}
         ListEmptyComponent={EmptyState}
+        onRefresh={onRefresh}
+        refreshing={refreshing}
       />
     </SafeAreaView>
   );

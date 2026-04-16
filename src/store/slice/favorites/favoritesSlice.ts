@@ -49,7 +49,7 @@ const favoritesSlice = createSlice({
       const id = action.payload.courseId;
       const exists = state.ids.includes(id);
       state.ids = exists
-        ? state.ids.filter((x) => x !== id)
+        ? state.ids.filter((favoriteId) => favoriteId !== id)
         : [...state.ids, id];
     },
     resetFavorites: () => initialState,
