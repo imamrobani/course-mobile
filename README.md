@@ -15,6 +15,7 @@ This project was implemented to satisfy the requirements in `TECHNICAL_TEST.txt`
 ## Demo
 
 - Video: (add link)
+- APK (Google Drive): https://drive.google.com/drive/folders/1kiCvXtcn_X924iwUvbGiYV0-Ai1aWZjg?usp=sharing
 
 ## Tech Stack
 
