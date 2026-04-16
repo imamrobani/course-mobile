@@ -1,9 +1,15 @@
-import React from 'react';
-import { ScrollView } from 'react-native';
+import React, { useMemo } from 'react';
+import { Pressable, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import { Header, Text, View } from '@components';
-import { useAppSelector } from '@store/hooks';
+import { Colors } from '@constants';
+import { useAppDispatch, useAppSelector } from '@store/hooks';
+import {
+  persistFavorites,
+  toggleFavoriteLocal,
+} from '@store/slice/favorites/favoritesSlice';
 import { RootStackParamList } from '@type/navigation';
 import CommentsLikesSection from './components/CommentsLikesSection';
 import styles from './styles';
@@ -12,9 +18,12 @@ import type { RouteProp } from '@react-navigation/native';
 const CourseDetailScreen = () => {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<RootStackParamList, 'CourseDetail'>>();
+  const dispatch = useAppDispatch();
   const { items } = useAppSelector((state) => state.courses);
+  const favorites = useAppSelector((state) => state.favorites);
+  const userId = useAppSelector((state) => state.auth.user?.id);
 
-  const course = React.useMemo(
+  const course = useMemo(
     () => items.find((c) => c.id === route.params.id),
     [items, route.params.id],
   );
@@ -37,6 +46,22 @@ const CourseDetailScreen = () => {
       </View>
     );
   }
+
+  const isFavorite = favorites.ids.includes(course.id);
+
+  const onToggleFavorite = () => {
+    if (!userId) {
+      return;
+    }
+
+    const exists = favorites.ids.includes(course.id);
+    const nextIds = exists
+      ? favorites.ids.filter((x) => x !== course.id)
+      : [...favorites.ids, course.id];
+
+    dispatch(toggleFavoriteLocal({ courseId: course.id }));
+    dispatch(persistFavorites({ userId, ids: nextIds }));
+  };
 
   return (
     <View style={styles.container}>
@@ -71,6 +96,19 @@ const CourseDetailScreen = () => {
               Rating {course.rating.toFixed(1)}
             </Text>
           </View>
+        </View>
+
+        <View row justifyContent="flex-end">
+          <Pressable
+            onPress={onToggleFavorite}
+            style={[styles.badge, styles.favoriteChip]}>
+            <Ionicons
+              name={isFavorite ? 'heart' : 'heart-outline'}
+              size={16}
+              color={isFavorite ? Colors.ACCENT_MAIN : Colors.NEUTRAL_70}
+            />
+            <Text type="captionSRegular">{isFavorite ? 'Saved' : 'Save'}</Text>
+          </Pressable>
         </View>
 
         <View style={styles.card}>

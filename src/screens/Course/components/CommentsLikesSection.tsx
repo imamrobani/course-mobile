@@ -29,7 +29,7 @@ const CommentsLikesSection = ({ courseId }: Props) => {
       {comments.length === 0 ? (
         <View alignItems="center" padding={16}>
           <Text type="body2Regular" color="NEUTRAL_70" center>
-            Belum ada komentar.
+            No comments yet.
           </Text>
         </View>
       ) : (

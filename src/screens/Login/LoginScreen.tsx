@@ -21,7 +21,7 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
     if (!form.email.trim() || !form.password) {
-      dispatch(setAuthError('Email dan password wajib diisi'));
+      dispatch(setAuthError('Email and password are required'));
       return;
     }
 

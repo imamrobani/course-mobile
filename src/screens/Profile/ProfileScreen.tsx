@@ -35,7 +35,7 @@ const ProfileScreen = () => {
         <Text type="body2Regular" color="NEUTRAL_70">
           Bio
         </Text>
-        <Text type="body1Regular">{user?.bio ?? 'Belum ada bio'}</Text>
+        <Text type="body1Regular">{user?.bio ?? 'No bio yet'}</Text>
       </View>
 
       <View gap={12} marginTop={6}>

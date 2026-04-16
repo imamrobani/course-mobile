@@ -43,9 +43,7 @@ export const loginWithEmailPassword = createAsyncThunk<
     return result;
   } catch (error) {
     const message =
-      error instanceof Error
-        ? error.message
-        : 'Email atau password tidak valid';
+      error instanceof Error ? error.message : 'Invalid email or password';
     return rejectWithValue(message);
   }
 });
@@ -117,7 +115,7 @@ const authSlice = createSlice({
         state.token = null;
         state.user = null;
         state.status = 'unauthenticated';
-        state.error = action.payload ?? 'Email atau password tidak valid';
+        state.error = action.payload ?? 'Invalid email or password';
       })
       .addCase(logout.fulfilled, (state) => {
         state.token = null;

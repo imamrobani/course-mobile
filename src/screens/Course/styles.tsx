@@ -28,6 +28,11 @@ const styles = StyleSheet.create({
     paddingVertical: scale(4),
     backgroundColor: Colors.NEUTRAL_20,
   },
+  favoriteChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(8),
+  },
   card: {
     borderRadius: scale(16),
     padding: scale(14),

@@ -5,7 +5,7 @@ export const mockComments: Comment[] = [
     id: 'c-1',
     courseId: '1',
     user: { id: '2', name: 'Jane Smith' },
-    message: 'Materinya jelas dan enak diikuti. Cocok buat pemula.',
+    message: 'Clear explanation and easy to follow. Great for beginners.',
     createdAt: '2025-05-03T10:00:00.000Z',
     likesCount: 2,
     likedByUser: false,
@@ -15,7 +15,7 @@ export const mockComments: Comment[] = [
     courseId: '1',
     user: { id: '1', name: 'John Doe' },
     message:
-      'Bagian navigation-nya helpful. Bisa ditambah contoh state management.',
+      'The navigation section is very helpful. Would love to see a state management example too.',
     createdAt: '2025-05-05T10:00:00.000Z',
     likesCount: 1,
     likedByUser: true,
@@ -25,7 +25,7 @@ export const mockComments: Comment[] = [
     courseId: '2',
     user: { id: '1', name: 'John Doe' },
     message:
-      'TypeScript tips-nya ngebantu banget buat rapihin types di project.',
+      'The TypeScript tips really helped me clean up types in my project.',
     createdAt: '2025-06-01T10:00:00.000Z',
     likesCount: 0,
     likedByUser: false,
@@ -35,7 +35,7 @@ export const mockComments: Comment[] = [
     courseId: '3',
     user: { id: '2', name: 'Jane Smith' },
     message:
-      'RTK + thunk pattern-nya bagus. Pengin lihat contoh optimistic update.',
+      'Great RTK + thunk patterns. Would love to see an optimistic update example.',
     createdAt: '2025-06-10T10:00:00.000Z',
     likesCount: 3,
     likedByUser: false,

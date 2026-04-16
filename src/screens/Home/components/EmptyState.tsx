@@ -6,7 +6,7 @@ const EmptyState = () => (
   <View style={styles.emptyContainer}>
     <Text type="body1SemiBold">No courses found</Text>
     <Text type="body2Regular" color="NEUTRAL_70" center>
-      Coba ubah keyword pencarian atau kategori.
+      Try adjusting your search term or category.
     </Text>
   </View>
 );

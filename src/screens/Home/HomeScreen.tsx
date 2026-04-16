@@ -7,6 +7,10 @@ import { CourseCard, View } from '@components';
 import { Colors } from '@constants';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
 import { setCategory, setQuery } from '@store/slice/courses/coursesSlice';
+import {
+  persistFavorites,
+  toggleFavoriteLocal,
+} from '@store/slice/favorites/favoritesSlice';
 import { Course } from '@type/models/course';
 import { RootStackParamList } from '@type/navigation';
 import EmptyState from './components/EmptyState';
@@ -22,6 +26,10 @@ const HomeScreen = () => {
   const navigation =
     useNavigation<StackNavigationProp<RootStackParamList, 'MainTab'>>();
   const { items, query, category } = useAppSelector((state) => state.courses);
+  const favorites = useAppSelector((state) => state.favorites);
+  const userId = useAppSelector((state) => state.auth.user?.id);
+
+  const favoriteSet = useMemo(() => new Set(favorites.ids), [favorites.ids]);
 
   const categories = useMemo(() => {
     const unique = Array.from(new Set(items.map((c) => c.category))).sort(
@@ -44,11 +52,26 @@ const HomeScreen = () => {
     navigation.navigate('CourseDetail', { id });
   };
 
+  const onToggleFavorite = (courseId: string) => {
+    if (!userId) {
+      return;
+    }
+
+    const exists = favoriteSet.has(courseId);
+    const nextIds = exists
+      ? favorites.ids.filter((x) => x !== courseId)
+      : [...favorites.ids, courseId];
+
+    dispatch(toggleFavoriteLocal({ courseId }));
+    dispatch(persistFavorites({ userId, ids: nextIds }));
+  };
+
   const renderItem = ({ item }: { item: Course }) => (
     <CourseCard
       course={item}
-      isFavorite={false}
+      isFavorite={favoriteSet.has(item.id)}
       onPress={() => onOpenDetail(item.id)}
+      onPressFavorite={() => onToggleFavorite(item.id)}
     />
   );
 

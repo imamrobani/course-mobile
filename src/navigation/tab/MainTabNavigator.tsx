@@ -1,16 +1,29 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   BottomTabBarProps,
   createBottomTabNavigator,
 } from '@react-navigation/bottom-tabs';
 import { Colors } from '@constants';
 import { FavoriteScreen, HomeScreen, ProfileScreen } from '@screens';
+import { useAppDispatch, useAppSelector } from '@store/hooks';
+import { hydrateFavorites } from '@store/slice/favorites/favoritesSlice';
 import { MainTabParamList } from '@type/navigation';
 import BottomTab from './BottomTab';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 const MainTabNavigator = () => {
+  const dispatch = useAppDispatch();
+  const userId = useAppSelector((state) => state.auth.user?.id);
+
+  useEffect(() => {
+    if (!userId) {
+      return;
+    }
+
+    dispatch(hydrateFavorites({ userId }));
+  }, [dispatch, userId]);
+
   const renderBottomTabBar = (props: BottomTabBarProps) => {
     return <BottomTab {...props} />;
   };

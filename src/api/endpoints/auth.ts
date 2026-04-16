@@ -28,11 +28,11 @@ const loginWithEmailPassword = async (
   );
 
   if (!rawUser) {
-    throw new Error('Email atau password tidak valid');
+    throw new Error('Invalid email or password');
   }
 
   if (rawUser.password !== input.password) {
-    throw new Error('Email atau password tidak valid');
+    throw new Error('Invalid email or password');
   }
 
   const { password: _password, ...user } = rawUser;
