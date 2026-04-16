@@ -1,6 +1,6 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { EditProfileScreen, LoginScreen } from '@screens';
+import { CourseDetailScreen, EditProfileScreen, LoginScreen } from '@screens';
 import { useAppSelector } from '@store/hooks';
 import { RootStackParamList } from '@type/navigation';
 import MainTabNavigator from './tab/MainTabNavigator';
@@ -21,6 +21,7 @@ const RootNavigator = () => {
       ) : (
         <Stack.Group>
           <Stack.Screen name="MainTab" component={MainTabNavigator} />
+          <Stack.Screen name="CourseDetail" component={CourseDetailScreen} />
           <Stack.Screen name="EditProfile" component={EditProfileScreen} />
         </Stack.Group>
       )}

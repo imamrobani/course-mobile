@@ -6,7 +6,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     borderWidth: 1,
     borderRadius: 6,
     paddingHorizontal: scale(8),
@@ -24,6 +24,9 @@ const styles = StyleSheet.create({
   iconContainer: {
     padding: scale(8),
     paddingLeft: scale(16),
+  },
+  iconLeftContainer: {
+    padding: scale(8),
   },
 });
 
