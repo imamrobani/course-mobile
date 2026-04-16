@@ -35,9 +35,8 @@ const mergeById = (
   Object.entries(incoming).forEach(([courseId, list]) => {
     const map = new Map((result[courseId] ?? []).map((c) => [c.id, c]));
     list.forEach((c) => {
-      if (!map.has(c.id)) {
-        map.set(c.id, c);
-      }
+      const prev = map.get(c.id);
+      map.set(c.id, prev ? { ...prev, ...c } : c);
     });
     result[courseId] = Array.from(map.values());
   });

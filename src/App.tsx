@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useColorScheme } from 'react-native';
+import { StatusBar, useColorScheme } from 'react-native';
 import {
   DarkTheme,
   DefaultTheme,
@@ -11,6 +11,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
+import { Colors } from '@constants';
 import Fonts from '@constants/Fonts';
 import RootNavigator from '@navigation/RootNavigator';
 import { hydrateAuth } from '@store/slice/auth/authSlice';
@@ -63,6 +64,7 @@ export function App() {
   return (
     <Provider store={store}>
       <SafeAreaProvider>
+        <StatusBar barStyle={'dark-content'} backgroundColor={Colors.WHITE} />
         <KeyboardProvider statusBarTranslucent>
           <NavigationContainer
             theme={theme}
