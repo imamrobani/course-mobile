@@ -10,6 +10,7 @@ type CommentsStatus = 'idle' | 'hydrating' | 'ready';
 
 type CommentsState = {
   byCourseId: Record<string, Comment[]>;
+  likedIds: string[];
   status: CommentsStatus;
   userId: string | null;
 };
@@ -17,25 +18,80 @@ type CommentsState = {
 const createCommentId = () =>
   `c-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-const getCommentsStorageKey = (userId: string) =>
-  `${StorageKey.COMMENTS}:${userId}`;
+const getCommentsStorageKey = () => StorageKey.COMMENTS_GLOBAL;
+
+const getLegacyCommentsStorageKey = (userId: string) =>
+  `${StorageKey.COMMENTS_GLOBAL}:${userId}`;
+
+const getCommentLikesStorageKey = (userId: string) =>
+  `${StorageKey.COMMENT_LIKES}:${userId}`;
+
+const mergeById = (
+  base: Record<string, Comment[]>,
+  incoming: Record<string, Comment[]>,
+) => {
+  const result: Record<string, Comment[]> = { ...base };
+
+  Object.entries(incoming).forEach(([courseId, list]) => {
+    const map = new Map((result[courseId] ?? []).map((c) => [c.id, c]));
+    list.forEach((c) => {
+      if (!map.has(c.id)) {
+        map.set(c.id, c);
+      }
+    });
+    result[courseId] = Array.from(map.values());
+  });
+
+  Object.entries(result).forEach(([courseId, list]) => {
+    result[courseId] = [...list].sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+  });
+
+  return result;
+};
 
 export const hydrateComments = createAsyncThunk<
-  { userId: string; byCourseId: Record<string, Comment[]> },
+  { userId: string; byCourseId: Record<string, Comment[]>; likedIds: string[] },
   { userId: string }
 >('comments/hydrate', async ({ userId }) => {
-  const key = getCommentsStorageKey(userId);
-  const byCourseId =
-    (await getDataStorage<Record<string, Comment[]>>(key)) ?? {};
-  return { userId, byCourseId };
+  const globalKey = getCommentsStorageKey();
+  const legacyKey = getLegacyCommentsStorageKey(userId);
+
+  const globalByCourseId =
+    (await getDataStorage<Record<string, Comment[]>>(globalKey)) ?? {};
+  const legacyByCourseId =
+    (await getDataStorage<Record<string, Comment[]>>(legacyKey)) ?? {};
+
+  const merged = mergeById(
+    mergeById(initialByCourseId, globalByCourseId),
+    legacyByCourseId,
+  );
+
+  if (Object.keys(legacyByCourseId).length > 0) {
+    await storeDataStorage(globalKey, merged);
+  }
+
+  const likedIds =
+    (await getDataStorage<string[]>(getCommentLikesStorageKey(userId))) ?? [];
+
+  return { userId, byCourseId: merged, likedIds };
 });
 
 export const persistComments = createAsyncThunk<
   void,
-  { userId: string; byCourseId: Record<string, Comment[]> }
->('comments/persist', async ({ userId, byCourseId }) => {
-  const key = getCommentsStorageKey(userId);
+  { byCourseId: Record<string, Comment[]> }
+>('comments/persist', async ({ byCourseId }) => {
+  const key = getCommentsStorageKey();
   await storeDataStorage(key, byCourseId);
+});
+
+export const persistCommentLikes = createAsyncThunk<
+  void,
+  { userId: string; likedIds: string[] }
+>('comments/persistLikes', async ({ userId, likedIds }) => {
+  await storeDataStorage(getCommentLikesStorageKey(userId), likedIds);
 });
 
 const initialByCourseId = mockComments.reduce<Record<string, Comment[]>>(
@@ -49,6 +105,7 @@ const initialByCourseId = mockComments.reduce<Record<string, Comment[]>>(
 
 const initialState: CommentsState = {
   byCourseId: initialByCourseId,
+  likedIds: [],
   status: 'idle',
   userId: null,
 };
@@ -100,8 +157,13 @@ const commentsSlice = createSlice({
         return;
       }
 
-      const nextLiked = !comment.likedByUser;
-      comment.likedByUser = nextLiked;
+      const liked = state.likedIds.includes(commentId);
+      const nextLiked = !liked;
+
+      state.likedIds = nextLiked
+        ? [...state.likedIds, commentId]
+        : state.likedIds.filter((id) => id !== commentId);
+
       comment.likesCount = Math.max(
         0,
         comment.likesCount + (nextLiked ? 1 : -1),
@@ -117,15 +179,14 @@ const commentsSlice = createSlice({
       .addCase(hydrateComments.fulfilled, (state, action) => {
         state.status = 'ready';
         state.userId = action.payload.userId;
-        state.byCourseId = {
-          ...initialByCourseId,
-          ...action.payload.byCourseId,
-        };
+        state.byCourseId = action.payload.byCourseId;
+        state.likedIds = action.payload.likedIds;
       })
       .addCase(hydrateComments.rejected, (state, action) => {
         state.status = 'ready';
         state.userId = action.meta.arg.userId;
         state.byCourseId = initialByCourseId;
+        state.likedIds = [];
       })
       .addCase(logout.fulfilled, () => initialState);
   },
@@ -138,7 +199,10 @@ export const toggleLike = createAsyncThunk<
   thunkApi.dispatch(toggleLikeLocal({ courseId, commentId }));
   const state = thunkApi.getState() as { comments: CommentsState };
   await thunkApi.dispatch(
-    persistComments({ userId, byCourseId: state.comments.byCourseId }),
+    persistComments({ byCourseId: state.comments.byCourseId }),
+  );
+  await thunkApi.dispatch(
+    persistCommentLikes({ userId, likedIds: state.comments.likedIds }),
   );
 });
 
@@ -156,7 +220,10 @@ export const addComment = createAsyncThunk<
     thunkApi.dispatch(addCommentLocal({ courseId, message, user }));
     const state = thunkApi.getState() as { comments: CommentsState };
     await thunkApi.dispatch(
-      persistComments({ userId, byCourseId: state.comments.byCourseId }),
+      persistComments({ byCourseId: state.comments.byCourseId }),
+    );
+    await thunkApi.dispatch(
+      persistCommentLikes({ userId, likedIds: state.comments.likedIds }),
     );
   },
 );

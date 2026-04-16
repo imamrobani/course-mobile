@@ -14,6 +14,7 @@ type Props = {
 const CommentsLikesSection = ({ courseId }: Props) => {
   const dispatch = useAppDispatch();
   const list = useAppSelector((state) => state.comments.byCourseId[courseId]);
+  const likedIds = useAppSelector((state) => state.comments.likedIds);
   const user = useAppSelector((state) => state.auth.user);
   const userId = useAppSelector((state) => state.auth.user?.id);
 
@@ -21,6 +22,7 @@ const CommentsLikesSection = ({ courseId }: Props) => {
   const inputRef = React.useRef<RNTextInput>(null);
 
   const comments = useMemo(() => list ?? [], [list]);
+  const likedSet = useMemo(() => new Set(likedIds), [likedIds]);
   const canSend = !!user && draft.trim().length > 0;
 
   const onSend = () => {
@@ -85,47 +87,49 @@ const CommentsLikesSection = ({ courseId }: Props) => {
         </View>
       ) : (
         <View gap={12}>
-          {comments.map((c) => (
-            <View key={c.id} style={styles.commentItem} gap={8}>
-              <View style={styles.commentHeader}>
-                <View gap={2}>
-                  <Text type="body2SemiBold">{c.user.name}</Text>
-                  <Text type="captionSRegular" color="NEUTRAL_70">
-                    {new Date(c.createdAt).toLocaleDateString()}
-                  </Text>
+          {comments.map((c) => {
+            const liked = likedSet.has(c.id);
+
+            return (
+              <View key={c.id} style={styles.commentItem} gap={8}>
+                <View style={styles.commentHeader}>
+                  <View gap={2}>
+                    <Text type="body2SemiBold">{c.user.name}</Text>
+                    <Text type="captionSRegular" color="NEUTRAL_70">
+                      {new Date(c.createdAt).toLocaleString()}
+                    </Text>
+                  </View>
+
+                  <Pressable
+                    style={styles.likeButton}
+                    onPress={() =>
+                      userId
+                        ? dispatch(
+                            toggleLike({
+                              userId,
+                              courseId,
+                              commentId: c.id,
+                            }),
+                          )
+                        : undefined
+                    }>
+                    <Ionicons
+                      name={liked ? 'heart' : 'heart-outline'}
+                      size={16}
+                      color={liked ? Colors.ACCENT_MAIN : Colors.NEUTRAL_70}
+                    />
+                    <Text type="captionSRegular" color="NEUTRAL_80">
+                      {c.likesCount}
+                    </Text>
+                  </Pressable>
                 </View>
 
-                <Pressable
-                  style={styles.likeButton}
-                  onPress={() =>
-                    userId
-                      ? dispatch(
-                          toggleLike({
-                            userId,
-                            courseId,
-                            commentId: c.id,
-                          }),
-                        )
-                      : undefined
-                  }>
-                  <Ionicons
-                    name={c.likedByUser ? 'heart' : 'heart-outline'}
-                    size={16}
-                    color={
-                      c.likedByUser ? Colors.ACCENT_MAIN : Colors.NEUTRAL_70
-                    }
-                  />
-                  <Text type="captionSRegular" color="NEUTRAL_80">
-                    {c.likesCount}
-                  </Text>
-                </Pressable>
+                <Text type="body2Regular" color="NEUTRAL_80">
+                  {c.message}
+                </Text>
               </View>
-
-              <Text type="body2Regular" color="NEUTRAL_80">
-                {c.message}
-              </Text>
-            </View>
-          ))}
+            );
+          })}
         </View>
       )}
     </View>
