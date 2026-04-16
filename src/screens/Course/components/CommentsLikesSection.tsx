@@ -1,10 +1,10 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { Pressable, TextInput as RNTextInput } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { TextInput as RNTextInput } from 'react-native';
 import { Button, Text, TextInputArea, View } from '@components';
 import { Colors } from '@constants';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
 import { addComment, toggleLike } from '@store/slice/comments/commentsSlice';
+import CommentItem from './CommentItem';
 import styles from './styles';
 
 type Props = {
@@ -24,6 +24,14 @@ const CommentsLikesSection = ({ courseId }: Props) => {
   const comments = useMemo(() => list ?? [], [list]);
   const likedSet = useMemo(() => new Set(likedIds), [likedIds]);
   const canSend = !!user && draft.trim().length > 0;
+
+  const createOnPressLike = (commentId: string) => {
+    if (!userId) {
+      return undefined;
+    }
+
+    dispatch(toggleLike({ userId, courseId, commentId }));
+  };
 
   const onSend = () => {
     if (!user || !userId) {
@@ -91,43 +99,12 @@ const CommentsLikesSection = ({ courseId }: Props) => {
             const liked = likedSet.has(comment.id);
 
             return (
-              <View key={comment.id} style={styles.commentItem} gap={8}>
-                <View style={styles.commentHeader}>
-                  <View gap={2}>
-                    <Text type="body2SemiBold">{comment.user.name}</Text>
-                    <Text type="captionSRegular" color="NEUTRAL_70">
-                      {new Date(comment.createdAt).toLocaleString()}
-                    </Text>
-                  </View>
-
-                  <Pressable
-                    style={styles.likeButton}
-                    onPress={() =>
-                      userId
-                        ? dispatch(
-                            toggleLike({
-                              userId,
-                              courseId,
-                              commentId: comment.id,
-                            }),
-                          )
-                        : undefined
-                    }>
-                    <Ionicons
-                      name={liked ? 'heart' : 'heart-outline'}
-                      size={16}
-                      color={liked ? Colors.ACCENT_MAIN : Colors.NEUTRAL_70}
-                    />
-                    <Text type="captionSRegular" color="NEUTRAL_80">
-                      {comment.likesCount}
-                    </Text>
-                  </Pressable>
-                </View>
-
-                <Text type="body2Regular" color="NEUTRAL_80">
-                  {comment.message}
-                </Text>
-              </View>
+              <CommentItem
+                key={comment.id}
+                comment={comment}
+                liked={liked}
+                onPressLike={() => createOnPressLike(comment.id)}
+              />
             );
           })}
         </View>
