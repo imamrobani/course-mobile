@@ -66,6 +66,29 @@ Notes:
 - `bun run start` runs `expo start --dev-client`. Use this if you have a Development Build installed.
 - For a fresh setup without a Development Build, prefer `bunx expo start` and open using Expo Go.
 
+## Build APK (EAS Local Preview)
+
+This project includes an `eas.json` profile for `preview` builds. To build an Android APK locally (no cloud build), use EAS Local Builds.
+
+Prerequisites:
+
+- `eas-cli` installed and logged in
+
+Build APK:
+
+```bash
+eas build --platform android --profile preview --local --output ./builds/course-mobile-preview.apk
+```
+
+Troubleshooting (local build cache issues):
+
+```bash
+rm -rf node_modules
+rm -rf ~/.npm/_npx
+rm -rf ~/.cache/eas-cli
+bun install
+```
+
 ## MockAPI (Endpoint Details)
 
 MockAPI is used for authentication and profile data.
@@ -87,6 +110,11 @@ Expected user schema (MockAPI `users` resource):
   "bio": "Mobile learner"
 }
 ```
+
+Test accounts (create these records in MockAPI `users`):
+
+- John: `john@example.com` / `123456`
+- Jane: `jane@example.com` / `123456`
 
 Login behavior:
 

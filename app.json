@@ -17,7 +17,11 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.imrob.course.mobile"
+      "package": "com.imrob.course.mobile",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -46,6 +50,11 @@
           "photosPermission": "The app accesses your photos to let you create a new event."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "3c364217-2011-4cd1-b733-9acfd215581e"
+      }
+    }
   }
 }
