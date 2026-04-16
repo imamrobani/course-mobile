@@ -1,4 +1,5 @@
-import { mockUsers } from '@mock/users';
+import api from '@api/client';
+import { API_URL } from '@constants/Endpoints';
 import { User } from '@type/models/user';
 
 export type LoginInput = {
@@ -11,27 +12,20 @@ export type LoginResult = {
   user: User;
 };
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 const fetchUsers = async (): Promise<User[]> => {
-  await sleep(500);
-  return mockUsers.map(({ password: _password, ...user }) => user);
+  const response = await api.get<User[]>(API_URL.USERS);
+  return response.data;
 };
 
 const loginWithEmailPassword = async (
   input: LoginInput,
 ): Promise<LoginResult> => {
-  await sleep(500);
-
-  const rawUser = mockUsers.find(
+  const users = await fetchUsers();
+  const rawUser = users.find(
     (u) => u.email.toLowerCase() === input.email.trim().toLowerCase(),
   );
 
-  if (!rawUser) {
-    throw new Error('Invalid email or password');
-  }
-
-  if (rawUser.password !== input.password) {
+  if (!rawUser || rawUser.password !== input.password) {
     throw new Error('Invalid email or password');
   }
 
