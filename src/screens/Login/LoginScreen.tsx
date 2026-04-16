@@ -1,5 +1,5 @@
 import React from 'react';
-import { KeyboardAvoidingView, Platform } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Button, Text, TextInput, View } from '@components';
 import { useForm } from '@hooks';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
@@ -34,61 +34,65 @@ const LoginScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <View marginBottom={24}>
-        <Text type="headingL" center color="PRIMARY_MAIN">
-          Welcome to Course Mobile
-        </Text>
-        <Text type="body1Regular" center color="NEUTRAL_70">
-          Where developers mock developers
-        </Text>
-      </View>
-
-      <View style={styles.inputContainer}>
-        <TextInput
-          label="Email"
-          placeholder="john@example.com"
-          value={form.email}
-          onChangeText={(text) => {
-            if (error) {
-              dispatch(setAuthError(null));
-            }
-            setForm({ email: text });
-          }}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-        <TextInput
-          label="Password"
-          placeholder="123456"
-          isPassword
-          value={form.password}
-          onChangeText={(text) => {
-            if (error) {
-              dispatch(setAuthError(null));
-            }
-            setForm({ password: text });
-          }}
-        />
-      </View>
-
-      {error ? (
-        <View marginBottom={12}>
-          <Text type="body2Regular" color="DANGER_MAIN" center>
-            {error}
+    <KeyboardAwareScrollView
+      bottomOffset={24}
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={styles.scrollContent}
+      style={styles.container}>
+      <View style={styles.content}>
+        <View marginBottom={24}>
+          <Text type="headingL" center color="PRIMARY_MAIN">
+            Welcome to Course Mobile
+          </Text>
+          <Text type="body1Regular" center color="NEUTRAL_70">
+            Where developers mock developers
           </Text>
         </View>
-      ) : null}
 
-      <Button
-        label="Login"
-        onPress={handleLogin}
-        isLoading={isAuthenticating}
-        disabled={disabled || isAuthenticating}
-      />
-    </KeyboardAvoidingView>
+        <View style={styles.inputContainer}>
+          <TextInput
+            label="Email"
+            placeholder="john@example.com"
+            value={form.email}
+            onChangeText={(text) => {
+              if (error) {
+                dispatch(setAuthError(null));
+              }
+              setForm({ email: text });
+            }}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          <TextInput
+            label="Password"
+            placeholder="123456"
+            isPassword
+            value={form.password}
+            onChangeText={(text) => {
+              if (error) {
+                dispatch(setAuthError(null));
+              }
+              setForm({ password: text });
+            }}
+          />
+        </View>
+
+        {error ? (
+          <View marginBottom={12}>
+            <Text type="body2Regular" color="DANGER_MAIN" center>
+              {error}
+            </Text>
+          </View>
+        ) : null}
+
+        <Button
+          label="Login"
+          onPress={handleLogin}
+          isLoading={isAuthenticating}
+          disabled={disabled || isAuthenticating}
+        />
+      </View>
+    </KeyboardAwareScrollView>
   );
 };
 

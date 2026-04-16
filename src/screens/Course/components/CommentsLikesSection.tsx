@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
-import { Pressable } from 'react-native';
+import { Pressable, TextInput as RNTextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Text, View } from '@components';
+import { Button, Text, TextInputArea, View } from '@components';
 import { Colors } from '@constants';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
-import { toggleLike } from '@store/slice/comments/commentsSlice';
+import { addComment, toggleLike } from '@store/slice/comments/commentsSlice';
 import styles from './styles';
 
 type Props = {
@@ -14,8 +14,34 @@ type Props = {
 const CommentsLikesSection = ({ courseId }: Props) => {
   const dispatch = useAppDispatch();
   const list = useAppSelector((state) => state.comments.byCourseId[courseId]);
+  const user = useAppSelector((state) => state.auth.user);
+
+  const [draft, setDraft] = React.useState('');
+  const inputRef = React.useRef<RNTextInput>(null);
 
   const comments = useMemo(() => list ?? [], [list]);
+  const canSend = !!user && draft.trim().length > 0;
+
+  const onSend = () => {
+    if (!user) {
+      return;
+    }
+
+    const message = draft.trim();
+    if (!message) {
+      return;
+    }
+
+    dispatch(
+      addComment({
+        courseId,
+        message,
+        user: { id: user.id, name: user.name, avatar: user.avatar },
+      }),
+    );
+    setDraft('');
+    inputRef.current?.blur();
+  };
 
   return (
     <View style={styles.section} gap={12}>
@@ -24,6 +50,29 @@ const CommentsLikesSection = ({ courseId }: Props) => {
         <Text type="body2Regular" color="NEUTRAL_70">
           {comments.length}
         </Text>
+      </View>
+
+      <View style={styles.composer}>
+        <TextInputArea
+          ref={inputRef}
+          value={draft}
+          onChangeText={setDraft}
+          placeholder="Write a comment..."
+          placeholderTextColor={Colors.NEUTRAL_70}
+          height={88}
+          containerStyle={{ backgroundColor: Colors.WHITE }}
+        />
+        <View style={styles.composerActions}>
+          <Button
+            label="Post"
+            disabled={!canSend}
+            height={36}
+            width={80}
+            onPress={onSend}
+            style={styles.postButton}
+            typeText="body2Medium"
+          />
+        </View>
       </View>
 
       {comments.length === 0 ? (

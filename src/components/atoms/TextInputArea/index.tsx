@@ -1,5 +1,10 @@
 import React, { forwardRef } from 'react';
-import { TextInputProps, TextInput as TextInputRN } from 'react-native';
+import {
+  TextInputProps,
+  TextInput as TextInputRN,
+  TextStyle,
+  ViewStyle,
+} from 'react-native';
 import { scale } from '@utils';
 import Text from '../Text';
 import View from '../View';
@@ -8,10 +13,28 @@ import styles from './styles';
 interface InputTextProps extends TextInputProps {
   label?: string;
   desc?: string;
+  height?: number;
+  containerStyle?: ViewStyle | ViewStyle[];
+  inputStyle?: TextStyle | TextStyle[];
 }
 
 const TextInputArea = forwardRef<TextInputRN, InputTextProps>(
-  ({ label, desc, ...props }, ref) => {
+  (
+    { label, desc, height = 120, containerStyle, inputStyle, style, ...props },
+    ref,
+  ) => {
+    const containerStyles = Array.isArray(containerStyle)
+      ? containerStyle
+      : containerStyle
+        ? [containerStyle]
+        : [];
+
+    const inputStyles = Array.isArray(inputStyle)
+      ? inputStyle
+      : inputStyle
+        ? [inputStyle]
+        : [];
+
     return (
       <View gap={scale(8)}>
         {label && (
@@ -19,10 +42,20 @@ const TextInputArea = forwardRef<TextInputRN, InputTextProps>(
             {label}
           </Text>
         )}
-        <View style={styles.container}>
+        <View
+          style={[
+            styles.container,
+            { height: scale(height) },
+            ...containerStyles,
+          ]}>
           <TextInputRN
             ref={ref}
-            style={styles.inputContainer}
+            style={[
+              styles.inputContainer,
+              { height: scale(height) },
+              ...inputStyles,
+              style,
+            ]}
             multiline={true}
             {...props}
           />

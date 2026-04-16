@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
-import { Pressable, ScrollView } from 'react-native';
+import { Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Image } from 'expo-image';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Header, Text, View } from '@components';
 import { Colors } from '@constants';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
@@ -67,7 +68,10 @@ const CourseDetailScreen = () => {
     <View style={styles.container}>
       <Header label="Course Detail" onBack={() => navigation.goBack()} />
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <KeyboardAwareScrollView
+        bottomOffset={24}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.scrollContent}>
         <Image
           source={{ uri: course.image }}
           style={styles.heroImage}
@@ -119,7 +123,7 @@ const CourseDetailScreen = () => {
         </View>
 
         <CommentsLikesSection courseId={course.id} />
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 };

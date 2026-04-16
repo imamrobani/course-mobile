@@ -8,6 +8,16 @@ const styles = StyleSheet.create({
     padding: scale(16),
     backgroundColor: Colors.NEUTRAL_20,
   },
+  composer: {
+    gap: scale(8),
+  },
+  composerActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  postButton: {
+    borderRadius: scale(12),
+  },
   commentItem: {
     borderRadius: scale(12),
     padding: scale(12),

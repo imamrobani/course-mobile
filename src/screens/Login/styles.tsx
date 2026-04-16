@@ -3,9 +3,12 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  content: {
+    flexGrow: 1,
+    justifyContent: 'center',
     padding: 24,
     gap: 32,
-    justifyContent: 'center',
   },
   scrollContent: {
     flexGrow: 1,

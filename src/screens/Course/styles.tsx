@@ -10,6 +10,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: scale(16),
     gap: scale(14),
+    paddingBottom: scale(24),
   },
   heroImage: {
     width: '100%',
