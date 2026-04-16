@@ -13,8 +13,8 @@ const LoginScreen = () => {
   const dispatch = useAppDispatch();
   const { isAuthenticating, error } = useAppSelector((state) => state.auth);
   const [form, setForm] = useForm({
-    email: 'john@example.com', // dummy email
-    password: '123456', // dummy password
+    email: '',
+    password: '',
   });
 
   const disabled = form.email.trim() === '' || form.password === '';
@@ -45,7 +45,7 @@ const LoginScreen = () => {
             Welcome to Course Mobile
           </Text>
           <Text type="body1Regular" center color="NEUTRAL_70">
-            Where developers mock developers
+            Learn, build, and grow with fellow developers
           </Text>
         </View>
 
