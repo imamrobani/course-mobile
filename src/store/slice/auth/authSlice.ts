@@ -53,11 +53,50 @@ export const logout = createAsyncThunk('auth/logout', async () => {
   await removeDataStorage(StorageKey.USER);
 });
 
+export const updateProfile = createAsyncThunk<
+  User,
+  { name: string; avatar: string; bio: string },
+  { rejectValue: string }
+>('auth/updateProfile', async (payload, { getState, rejectWithValue }) => {
+  try {
+    const state = getState() as { auth?: { user?: User | null } };
+    const currentUser =
+      state.auth?.user ?? (await getDataStorage<User>(StorageKey.USER));
+
+    if (!currentUser) {
+      return rejectWithValue('User session not found');
+    }
+
+    const name = payload.name.trim();
+    if (!name) {
+      return rejectWithValue('Name is required');
+    }
+
+    const avatar = payload.avatar.trim();
+    const bio = payload.bio.trim();
+
+    const updatedUser: User = {
+      ...currentUser,
+      name,
+      avatar: avatar || currentUser.avatar,
+      bio: bio ? bio : undefined,
+    };
+
+    await storeDataStorage(StorageKey.USER, updatedUser);
+    return updatedUser;
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Failed to update profile';
+    return rejectWithValue(message);
+  }
+});
+
 interface AuthState {
   status: AuthStatus;
   token: string | null;
   user: User | null;
   isAuthenticating: boolean;
+  isUpdatingProfile: boolean;
   error: string | null;
 }
 
@@ -66,6 +105,7 @@ const initialState: AuthState = {
   token: null,
   user: null,
   isAuthenticating: false,
+  isUpdatingProfile: false,
   error: null,
 };
 
@@ -117,11 +157,22 @@ const authSlice = createSlice({
         state.status = 'unauthenticated';
         state.error = action.payload ?? 'Invalid email or password';
       })
+      .addCase(updateProfile.pending, (state) => {
+        state.isUpdatingProfile = true;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.isUpdatingProfile = false;
+        state.user = action.payload;
+      })
+      .addCase(updateProfile.rejected, (state) => {
+        state.isUpdatingProfile = false;
+      })
       .addCase(logout.fulfilled, (state) => {
         state.token = null;
         state.user = null;
         state.status = 'unauthenticated';
         state.isAuthenticating = false;
+        state.isUpdatingProfile = false;
         state.error = null;
       });
   },
