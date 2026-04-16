@@ -4,7 +4,7 @@
     "slug": "course-mobile",
     "version": "1.0.0",
     "orientation": "default",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/brand/icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "scheme": "course-mobile",
@@ -14,7 +14,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/brand/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.imrob.course.mobile",
@@ -33,7 +33,7 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#ffffff",
-          "image": "./assets/splash-icon.png"
+          "image": "./assets/brand/splash.png"
         }
       ],
       [
