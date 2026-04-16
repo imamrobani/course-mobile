@@ -1,6 +1,8 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import api from '@api/client';
 import { AuthApi, LoginInput, LoginResult } from '@api/endpoints/auth';
 import { StorageKey } from '@constants';
+import { API_URL } from '@constants/Endpoints';
 import { User } from '@type/models/user';
 import {
   getDataStorage,
@@ -75,13 +77,23 @@ export const updateProfile = createAsyncThunk<
     const avatar = payload.avatar.trim();
     const bio = payload.bio.trim();
 
-    const updatedUser: User = {
-      ...currentUser,
+    const remoteUser = await api.get<User & { password?: string }>(
+      `/users/${currentUser.id}`,
+    );
+
+    const putPayload = {
+      ...remoteUser.data,
       name,
-      avatar: avatar || currentUser.avatar,
-      bio: bio ? bio : undefined,
+      avatar: avatar || remoteUser.data.avatar,
+      bio: bio || remoteUser.data.bio,
     };
 
+    const updatedRemote = await api.put<User & { password?: string }>(
+      `${API_URL.USERS}/${currentUser.id}`,
+      putPayload,
+    );
+
+    const { password: _password, ...updatedUser } = updatedRemote.data;
     await storeDataStorage(StorageKey.USER, updatedUser);
     return updatedUser;
   } catch (error) {

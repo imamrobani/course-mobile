@@ -1,28 +1,63 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { StorageKey } from '@constants';
 import { mockComments } from '@mock/comments';
+import { logout } from '@store/slice/auth/authSlice';
 import { Comment } from '@type/models/course';
+import { getDataStorage, storeDataStorage } from '@utils/storage';
 import type { PayloadAction } from '@reduxjs/toolkit';
+
+type CommentsStatus = 'idle' | 'hydrating' | 'ready';
 
 type CommentsState = {
   byCourseId: Record<string, Comment[]>;
+  status: CommentsStatus;
+  userId: string | null;
 };
 
 const createCommentId = () =>
   `c-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-const initialState: CommentsState = {
-  byCourseId: mockComments.reduce<Record<string, Comment[]>>((acc, comment) => {
+const getCommentsStorageKey = (userId: string) =>
+  `${StorageKey.COMMENTS}:${userId}`;
+
+export const hydrateComments = createAsyncThunk<
+  { userId: string; byCourseId: Record<string, Comment[]> },
+  { userId: string }
+>('comments/hydrate', async ({ userId }) => {
+  const key = getCommentsStorageKey(userId);
+  const byCourseId =
+    (await getDataStorage<Record<string, Comment[]>>(key)) ?? {};
+  return { userId, byCourseId };
+});
+
+export const persistComments = createAsyncThunk<
+  void,
+  { userId: string; byCourseId: Record<string, Comment[]> }
+>('comments/persist', async ({ userId, byCourseId }) => {
+  const key = getCommentsStorageKey(userId);
+  await storeDataStorage(key, byCourseId);
+});
+
+const initialByCourseId = mockComments.reduce<Record<string, Comment[]>>(
+  (acc, comment) => {
     acc[comment.courseId] = acc[comment.courseId] ?? [];
     acc[comment.courseId].push(comment);
     return acc;
-  }, {}),
+  },
+  {},
+);
+
+const initialState: CommentsState = {
+  byCourseId: initialByCourseId,
+  status: 'idle',
+  userId: null,
 };
 
 const commentsSlice = createSlice({
   name: 'comments',
   initialState,
   reducers: {
-    addComment: (
+    addCommentLocal: (
       state,
       action: PayloadAction<{
         courseId: string;
@@ -50,7 +85,7 @@ const commentsSlice = createSlice({
         ...(state.byCourseId[action.payload.courseId] ?? []),
       ];
     },
-    toggleLike: (
+    toggleLikeLocal: (
       state,
       action: PayloadAction<{ courseId: string; commentId: string }>,
     ) => {
@@ -73,8 +108,59 @@ const commentsSlice = createSlice({
       );
     },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(hydrateComments.pending, (state, action) => {
+        state.status = 'hydrating';
+        state.userId = action.meta.arg.userId;
+      })
+      .addCase(hydrateComments.fulfilled, (state, action) => {
+        state.status = 'ready';
+        state.userId = action.payload.userId;
+        state.byCourseId = {
+          ...initialByCourseId,
+          ...action.payload.byCourseId,
+        };
+      })
+      .addCase(hydrateComments.rejected, (state, action) => {
+        state.status = 'ready';
+        state.userId = action.meta.arg.userId;
+        state.byCourseId = initialByCourseId;
+      })
+      .addCase(logout.fulfilled, () => initialState);
+  },
 });
 
-export const { addComment, toggleLike } = commentsSlice.actions;
+export const toggleLike = createAsyncThunk<
+  void,
+  { userId: string; courseId: string; commentId: string }
+>('comments/toggleLike', async ({ userId, courseId, commentId }, thunkApi) => {
+  thunkApi.dispatch(toggleLikeLocal({ courseId, commentId }));
+  const state = thunkApi.getState() as { comments: CommentsState };
+  await thunkApi.dispatch(
+    persistComments({ userId, byCourseId: state.comments.byCourseId }),
+  );
+});
+
+export const addComment = createAsyncThunk<
+  void,
+  {
+    userId: string;
+    courseId: string;
+    message: string;
+    user: { id: string; name: string; avatar?: string };
+  }
+>(
+  'comments/addComment',
+  async ({ userId, courseId, message, user }, thunkApi) => {
+    thunkApi.dispatch(addCommentLocal({ courseId, message, user }));
+    const state = thunkApi.getState() as { comments: CommentsState };
+    await thunkApi.dispatch(
+      persistComments({ userId, byCourseId: state.comments.byCourseId }),
+    );
+  },
+);
+
+export const { addCommentLocal, toggleLikeLocal } = commentsSlice.actions;
 
 export default commentsSlice.reducer;

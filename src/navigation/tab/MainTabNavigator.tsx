@@ -6,6 +6,7 @@ import {
 import { Colors } from '@constants';
 import { FavoriteScreen, HomeScreen, ProfileScreen } from '@screens';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
+import { hydrateComments } from '@store/slice/comments/commentsSlice';
 import { hydrateFavorites } from '@store/slice/favorites/favoritesSlice';
 import { MainTabParamList } from '@type/navigation';
 import BottomTab from './BottomTab';
@@ -21,6 +22,7 @@ const MainTabNavigator = () => {
       return;
     }
 
+    dispatch(hydrateComments({ userId }));
     dispatch(hydrateFavorites({ userId }));
   }, [dispatch, userId]);
 

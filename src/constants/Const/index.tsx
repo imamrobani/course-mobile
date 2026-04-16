@@ -9,4 +9,5 @@ export const StorageKey = {
   USER: 'user',
   TOKEN: 'token',
   FAVORITES: 'favorites',
+  COMMENTS: 'comments',
 } as const;

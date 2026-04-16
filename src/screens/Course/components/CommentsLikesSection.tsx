@@ -15,6 +15,7 @@ const CommentsLikesSection = ({ courseId }: Props) => {
   const dispatch = useAppDispatch();
   const list = useAppSelector((state) => state.comments.byCourseId[courseId]);
   const user = useAppSelector((state) => state.auth.user);
+  const userId = useAppSelector((state) => state.auth.user?.id);
 
   const [draft, setDraft] = React.useState('');
   const inputRef = React.useRef<RNTextInput>(null);
@@ -23,7 +24,7 @@ const CommentsLikesSection = ({ courseId }: Props) => {
   const canSend = !!user && draft.trim().length > 0;
 
   const onSend = () => {
-    if (!user) {
+    if (!user || !userId) {
       return;
     }
 
@@ -34,6 +35,7 @@ const CommentsLikesSection = ({ courseId }: Props) => {
 
     dispatch(
       addComment({
+        userId,
         courseId,
         message,
         user: { id: user.id, name: user.name, avatar: user.avatar },
@@ -96,7 +98,15 @@ const CommentsLikesSection = ({ courseId }: Props) => {
                 <Pressable
                   style={styles.likeButton}
                   onPress={() =>
-                    dispatch(toggleLike({ courseId, commentId: c.id }))
+                    userId
+                      ? dispatch(
+                          toggleLike({
+                            userId,
+                            courseId,
+                            commentId: c.id,
+                          }),
+                        )
+                      : undefined
                   }>
                   <Ionicons
                     name={c.likedByUser ? 'heart' : 'heart-outline'}
