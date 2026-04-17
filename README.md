@@ -2,7 +2,7 @@
 
 A small **Course App** built with **Expo (React Native)** and **TypeScript**.
 
-This project was implemented to satisfy the requirements in `TECHNICAL_TEST.txt`:
+This project was implemented as a mobile take-home test to demonstrate:
 
 - Splash/app loading that hydrates a persisted session
 - Login flow using MockAPI (email + password)
@@ -14,7 +14,8 @@ This project was implemented to satisfy the requirements in `TECHNICAL_TEST.txt`
 
 ## Demo
 
-- Video: (add link)
+- Video (Jam #1): https://jam.dev/c/a71ac977-6de6-49ca-ad10-13506aee47ca
+- Video (Jam #2): https://jam.dev/c/6bc38af5-bdc6-488f-8a17-e07af5998f9e
 - APK (Google Drive): https://drive.google.com/drive/folders/1kiCvXtcn_X924iwUvbGiYV0-Ai1aWZjg?usp=sharing
 
 ## Tech Stack
